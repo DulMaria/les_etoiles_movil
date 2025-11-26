@@ -42,14 +42,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkSession() async {
-    // Pequeña pausa para mostrar splash
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 2));
     
     final isLoggedIn = await _authService.isLoggedIn();
     
     if (mounted) {
       if (isLoggedIn) {
-        // Intentar obtener el perfil
         final perfilResult = await _authService.getMiPerfil();
         
         if (perfilResult['success']) {
@@ -61,14 +59,12 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           );
         } else {
-          // Token inválido, ir al login
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const LoginScreen()),
           );
         }
       } else {
-        // No hay sesión, ir al login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -85,30 +81,49 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade400, Colors.blue.shade800],
+            colors: [
+              const Color(0xFF4FC3F7),
+              const Color(0xFF29B6F6),
+            ],
           ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.water_drop,
-                size: 100,
-                color: Colors.white,
+              // Logo
+              Image.asset(
+                'lib/assets/images/LogoPlayaAzul.png',
+                width: 150,
+                height: 150,
               ),
-              const SizedBox(height: 24),
+              
+              const SizedBox(height: 32),
+              
               const Text(
-                'Les Toiles de L\'Eau',
+                'Piscina Playa Azul',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 40),
+              
+              const SizedBox(height: 8),
+              
+              const Text(
+                'Tu destino de relax',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white70,
+                ),
+              ),
+              
+              const SizedBox(height: 50),
+              
               const CircularProgressIndicator(
                 color: Colors.white,
+                strokeWidth: 3,
               ),
             ],
           ),

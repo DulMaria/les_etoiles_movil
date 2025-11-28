@@ -1,65 +1,77 @@
 import 'package:flutter/material.dart';
 import '../models/usuario_model.dart';
-import '../service/auth_service.dart';
-import 'login_screen.dart';
+import '../widgets/custom_drawer.dart';
+import 'reserva_hospedaje_screen.dart';
+import 'reserva_eventos_screen.dart';
+import 'notificaciones_screen.dart';
+import 'perfil_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final Usuario usuario;
   
   const DashboardScreen({Key? key, required this.usuario}) : super(key: key);
 
-  Future<void> _handleLogout(BuildContext context) async {
-    final authService = AuthService();
-    await authService.logout();
-    
-    if (context.mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F9FA),
       appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _handleLogout(context),
-            tooltip: 'Cerrar Sesión',
+        elevation: 0,
+        backgroundColor: const Color(0xFF00BCD4),
+        title: const Text(
+          'Piscina Playa Azul',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
-        ],
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
+      drawer: CustomDrawer(usuario: usuario),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Header de bienvenida
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue.shade600, Colors.blue.shade400],
+                  colors: [
+                    const Color(0xFF00BCD4),
+                    const Color(0xFF00ACC1),
+                  ],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00BCD4).withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.blue.shade600,
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person,
+                        size: 50,
+                        color: const Color(0xFF00BCD4),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     '¡Bienvenido!',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -71,76 +83,32 @@ class DashboardScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 20,
                       color: Colors.white,
+                      fontWeight: FontWeight.w500,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 16,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       usuario.rol,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Información del usuario
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Información Personal',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  _buildInfoCard(
-                    icon: Icons.badge,
-                    title: 'CI',
-                    value: usuario.ci.toString(),
-                  ),
-                  
-                  _buildInfoCard(
-                    icon: Icons.email,
-                    title: 'Email',
-                    value: usuario.email,
-                  ),
-                  
-                  _buildInfoCard(
-                    icon: Icons.phone,
-                    title: 'Teléfono',
-                    value: usuario.telefono.toString(),
-                  ),
-                  
-                  _buildInfoCard(
-                    icon: Icons.assignment,
-                    title: 'Rol',
-                    value: usuario.rol,
-                  ),
-                  
-                  _buildInfoCard(
-                    icon: Icons.check_circle,
-                    title: 'Estado',
-                    value: usuario.estado == 'A' ? 'Activo' : 'Inactivo',
-                    valueColor: usuario.estado == 'A' 
-                        ? Colors.green 
-                        : Colors.red,
                   ),
                 ],
               ),
@@ -148,18 +116,19 @@ class DashboardScreen extends StatelessWidget {
             
             // Sección de acciones rápidas
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'Acciones Rápidas',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: Color(0xFF00838F),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   
                   GridView.count(
                     shrinkWrap: true,
@@ -167,52 +136,72 @@ class DashboardScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
+                    childAspectRatio: 1.1,
                     children: [
                       _buildActionCard(
                         context,
-                        icon: Icons.people,
-                        title: 'Usuarios',
-                        color: Colors.blue,
+                        icon: Icons.hotel,
+                        title: 'Reserva\nHospedaje',
+                        gradient: LinearGradient(
+                          colors: [Colors.blue.shade400, Colors.blue.shade600],
+                        ),
                         onTap: () {
-                          // Navegar a lista de usuarios
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ir a Usuarios')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ReservaHospedajeScreen(usuario: usuario),
+                            ),
                           );
                         },
                       ),
                       
                       _buildActionCard(
                         context,
-                        icon: Icons.settings,
-                        title: 'Configuración',
-                        color: Colors.orange,
+                        icon: Icons.event,
+                        title: 'Reserva\nEventos',
+                        gradient: LinearGradient(
+                          colors: [Colors.purple.shade400, Colors.purple.shade600],
+                        ),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ir a Configuración')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ReservaEventosScreen(usuario: usuario),
+                            ),
                           );
                         },
                       ),
                       
                       _buildActionCard(
                         context,
-                        icon: Icons.analytics,
-                        title: 'Reportes',
-                        color: Colors.green,
+                        icon: Icons.notifications_active,
+                        title: 'Notificaciones',
+                        gradient: LinearGradient(
+                          colors: [Colors.orange.shade400, Colors.orange.shade600],
+                        ),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ir a Reportes')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotificacionesScreen(usuario: usuario),
+                            ),
                           );
                         },
                       ),
                       
                       _buildActionCard(
                         context,
-                        icon: Icons.help,
-                        title: 'Ayuda',
-                        color: Colors.purple,
+                        icon: Icons.person,
+                        title: 'Mi Perfil',
+                        gradient: LinearGradient(
+                          colors: [Colors.teal.shade400, Colors.teal.shade600],
+                        ),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ir a Ayuda')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PerfilScreen(usuario: usuario),
+                            ),
                           );
                         },
                       ),
@@ -227,73 +216,48 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    Color? valueColor,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
-        ),
-        subtitle: Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: valueColor ?? Colors.black87,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionCard(
     BuildContext context, {
     required IconData icon,
     required String title,
-    required Color color,
+    required Gradient gradient,
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: Colors.white.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
-                  color: color,
+                  size: 36,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
               ),

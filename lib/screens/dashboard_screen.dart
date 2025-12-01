@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/usuario_model.dart';
 import '../widgets/custom_drawer.dart';
+import '../utils/theme_by_role.dart';
 import 'reserva_hospedaje_screen.dart';
 import 'reserva_eventos_screen.dart';
 import 'notificaciones_screen.dart';
@@ -13,16 +14,26 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = ThemeByRole.getPrimaryColor(usuario.rol);
+    final secondaryColor = ThemeByRole.getSecondaryColor(usuario.rol);
+    final backgroundColor = ThemeByRole.getBackgroundColor(usuario.rol);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FA),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF00BCD4),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: ThemeByRole.getAppBarGradient(usuario.rol),
+          ),
+        ),
         title: const Text(
           'Piscina Playa Azul',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
+            color: Colors.white,
+            letterSpacing: 0.5,
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -31,22 +42,17 @@ class DashboardScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header de bienvenida
+            // Header de bienvenida con diseño moderno
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF00BCD4),
-                    const Color(0xFF00ACC1),
-                  ],
-                ),
+                gradient: ThemeByRole.getHeaderGradient(usuario.rol),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00BCD4).withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
+                    color: primaryColor.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
@@ -57,6 +63,13 @@ class DashboardScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: CircleAvatar(
                       radius: 50,
@@ -64,7 +77,7 @@ class DashboardScreen extends StatelessWidget {
                       child: Icon(
                         Icons.person,
                         size: 50,
-                        color: const Color(0xFF00BCD4),
+                        color: ThemeByRole.getProfileIconColor(usuario.rol),
                       ),
                     ),
                   ),
@@ -75,6 +88,7 @@ class DashboardScreen extends StatelessWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -90,15 +104,15 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 20,
+                      vertical: 10,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
+                        color: Colors.white.withOpacity(0.5),
+                        width: 1.5,
                       ),
                     ),
                     child: Text(
@@ -107,6 +121,7 @@ class DashboardScreen extends StatelessWidget {
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -120,14 +135,6 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Acciones Rápidas',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF00838F),
-                    ),
-                  ),
                   const SizedBox(height: 20),
                   
                   GridView.count(
@@ -140,10 +147,12 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       _buildActionCard(
                         context,
-                        icon: Icons.hotel,
+                        icon: Icons.hotel_rounded,
                         title: 'Reserva\nHospedaje',
-                        gradient: LinearGradient(
-                          colors: [Colors.blue.shade400, Colors.blue.shade600],
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)], // AZUL FIJO
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
                         onTap: () {
                           Navigator.push(
@@ -157,10 +166,12 @@ class DashboardScreen extends StatelessWidget {
                       
                       _buildActionCard(
                         context,
-                        icon: Icons.event,
+                        icon: Icons.event_rounded,
                         title: 'Reserva\nEventos',
-                        gradient: LinearGradient(
-                          colors: [Colors.purple.shade400, Colors.purple.shade600],
+                        gradient: const LinearGradient(
+                          colors: [ThemeByRole.sharedAccentLavender, ThemeByRole.sharedSoftPink], // PÚRPURA-ROSADO FIJO
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
                         onTap: () {
                           Navigator.push(
@@ -174,10 +185,12 @@ class DashboardScreen extends StatelessWidget {
                       
                       _buildActionCard(
                         context,
-                        icon: Icons.notifications_active,
+                        icon: Icons.notifications_active_rounded,
                         title: 'Notificaciones',
-                        gradient: LinearGradient(
-                          colors: [Colors.orange.shade400, Colors.orange.shade600],
+                        gradient: const LinearGradient(
+                          colors: [ThemeByRole.sharedAccentAmber, ThemeByRole.sharedAccentCoral], // ÁMBAR-CORAL FIJO
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
                         onTap: () {
                           Navigator.push(
@@ -189,13 +202,28 @@ class DashboardScreen extends StatelessWidget {
                         },
                       ),
                       
+                      // TARJETA "MI PERFIL" - CAMBIA SEGÚN ROL
                       _buildActionCard(
                         context,
-                        icon: Icons.person,
+                        icon: Icons.person_rounded,
                         title: 'Mi Perfil',
-                        gradient: LinearGradient(
-                          colors: [Colors.teal.shade400, Colors.teal.shade600],
-                        ),
+                        gradient: ThemeByRole.isAdmin(usuario.rol)
+                            ? LinearGradient(
+                                colors: [
+                                  ThemeByRole.getPrimaryColor(usuario.rol),
+                                  ThemeByRole.getSecondaryColor(usuario.rol)
+                                ], // AZUL GRADIENTE PARA ADMIN
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : const LinearGradient(
+                                colors: [
+                                  ThemeByRole.sharedAccentMint,
+                                  ThemeByRole.sharedVibrantTeal
+                                ], // VERDE GRADIENTE PARA EMPLEADO
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -224,10 +252,11 @@ class DashboardScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 4,
+      elevation: 8,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
+      shadowColor: Colors.black26,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -235,6 +264,13 @@ class DashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: gradient,
             borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -242,7 +278,7 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withOpacity(0.25),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -258,6 +294,7 @@ class DashboardScreen extends StatelessWidget {
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  letterSpacing: 0.3,
                 ),
                 textAlign: TextAlign.center,
               ),

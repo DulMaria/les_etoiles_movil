@@ -312,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen>
             // Campo Usuario con validaciones
             _buildTextField(
               controller: _usernameController,
-              hint: 'Username',
+              hint: 'Usuario',
               icon: Icons.person_outline_rounded,
               isFocused: _isUsernameFocused,
               maxLength: 150,
@@ -332,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen>
             // Campo Contraseña con validaciones
             _buildTextField(
               controller: _passwordController,
-              hint: 'Password',
+              hint: 'Contraseña',
               icon: Icons.lock_outline_rounded,
               isPassword: true,
               isFocused: _isPasswordFocused,
@@ -349,11 +349,11 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             const SizedBox(height: 28),
             _buildLoginButton(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
             const Text(
               'Playa Azul © 2025',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 color: Color.fromARGB(255, 255, 255, 255),
               ),
               textAlign: TextAlign.center,
@@ -496,7 +496,7 @@ class _LoginScreenState extends State<LoginScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Text(
-                        'Secure Login',
+                        'Iniciar Sesión',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w600,

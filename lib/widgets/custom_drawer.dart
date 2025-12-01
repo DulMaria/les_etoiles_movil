@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/usuario_model.dart';
 import '../service/auth_service.dart';
+import '../utils/theme_by_role.dart'; // Importar la nueva clase
 import '../screens/login_screen.dart';
 import '../screens/reserva_hospedaje_screen.dart';
 import '../screens/reserva_eventos_screen.dart';
@@ -12,20 +13,11 @@ class CustomDrawer extends StatelessWidget {
 
   const CustomDrawer({Key? key, required this.usuario}) : super(key: key);
 
-  Future<void> _handleLogout(BuildContext context) async {
-    final authService = AuthService();
-    await authService.logout();
-    
-    if (context.mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final primaryColor = ThemeByRole.getPrimaryColor(usuario.rol);
+    final secondaryColor = ThemeByRole.getSecondaryColor(usuario.rol);
+
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
@@ -33,7 +25,7 @@ class CustomDrawer extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF00D4FF).withOpacity(0.1),
+              primaryColor.withOpacity(0.1),
               Colors.white,
             ],
           ),
@@ -46,10 +38,7 @@ class CustomDrawer extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF00BCD4),
-                    const Color(0xFF00ACC1),
-                  ],
+                  colors: [primaryColor, secondaryColor],
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -73,7 +62,7 @@ class CustomDrawer extends StatelessWidget {
                       child: Icon(
                         Icons.person,
                         size: 45,
-                        color: const Color(0xFF00BCD4),
+                        color: primaryColor,
                       ),
                     ),
                   ),
@@ -128,6 +117,7 @@ class CustomDrawer extends StatelessWidget {
                     context,
                     icon: Icons.home,
                     title: 'Inicio',
+                    iconColor: primaryColor,
                     onTap: () {
                       Navigator.pop(context);
                     },
@@ -139,6 +129,7 @@ class CustomDrawer extends StatelessWidget {
                     context,
                     icon: Icons.hotel,
                     title: 'Reserva Hospedaje',
+                    iconColor: primaryColor,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -154,6 +145,7 @@ class CustomDrawer extends StatelessWidget {
                     context,
                     icon: Icons.event,
                     title: 'Reserva Eventos',
+                    iconColor: primaryColor,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -172,6 +164,7 @@ class CustomDrawer extends StatelessWidget {
                     icon: Icons.notifications,
                     title: 'Notificaciones',
                     badge: '3',
+                    iconColor: primaryColor,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -187,6 +180,7 @@ class CustomDrawer extends StatelessWidget {
                     context,
                     icon: Icons.person,
                     title: 'Mi Perfil',
+                    iconColor: primaryColor,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -199,30 +193,6 @@ class CustomDrawer extends StatelessWidget {
                   ),
                   
                   const Divider(height: 1, thickness: 1),
-                  
-                  _buildDrawerItem(
-                    context,
-                    icon: Icons.settings,
-                    title: 'Configuración',
-                    onTap: () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Ir a Configuración')),
-                      );
-                    },
-                  ),
-                  
-                  _buildDrawerItem(
-                    context,
-                    icon: Icons.help_outline,
-                    title: 'Ayuda',
-                    onTap: () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Ir a Ayuda')),
-                      );
-                    },
-                  ),
                 ],
               ),
             ),
@@ -249,6 +219,18 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
+  Future<void> _handleLogout(BuildContext context) async {
+    final authService = AuthService();
+    await authService.logout();
+    
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   Widget _buildDrawerItem(
     BuildContext context, {
     required IconData icon,
@@ -262,12 +244,12 @@ class CustomDrawer extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (iconColor ?? const Color(0xFF00BCD4)).withOpacity(0.1),
+          color: (iconColor ?? Colors.blue).withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
           icon,
-          color: iconColor ?? const Color(0xFF00BCD4),
+          color: iconColor ?? Colors.blue,
           size: 24,
         ),
       ),

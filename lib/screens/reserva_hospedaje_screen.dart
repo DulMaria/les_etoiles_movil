@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/usuario_model.dart';
 import '../models/reserva_hotel_model.dart';
 import '../service/hotel_api_service.dart';
+//import '../screens/dashboard_screen.dart';
 
 class ReservaHospedajeScreen extends StatefulWidget {
   final Usuario usuario;
@@ -16,6 +17,19 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   
+  // 🎨 PALETA DE COLORES AZUL - COHERENTE CON DASHBOARD
+  static const Color primaryBlue = Color(0xFF3B82F6);        // Azul principal
+ // static const Color secondaryBlue = Color(0xFF60A5FA);      // Azul secundario
+  static const Color lightBlue = Color(0xFFDBEAFE);          // Azul claro
+  static const Color mediumBlue = Color(0xFFBFDBFE);         // Azul medio
+  static const Color darkBlue = Color(0xFF1D4ED8);           // Azul oscuro
+  
+  // COLORES FUNCIONALES
+  static const Color successColor = Color(0xFF10B981);
+  static const Color warningColor = Color(0xFFF59E0B);
+  static const Color errorColor = Color(0xFFEF4444);
+  static const Color infoColor = Color(0xFF06B6D4);
+
   List<ReservaHotel> reservasPendientes = [];
   List<ReservaHotel> reservasCheckIn = [];
   List<ReservaHotel> reservasCheckOut = [];
@@ -61,7 +75,6 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     }
   }
 
-  // 📋 CARGAR RESERVAS PENDIENTES
   Future<void> _cargarReservasPendientes() async {
     setState(() => isLoadingPendientes = true);
     try {
@@ -74,7 +87,6 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     }
   }
 
-  // 🏨 CARGAR RESERVAS EN CHECK-IN
   Future<void> _cargarReservasCheckIn() async {
     setState(() => isLoadingCheckIn = true);
     try {
@@ -87,7 +99,6 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     }
   }
 
-  // ✅ CARGAR RESERVAS FINALIZADAS
   Future<void> _cargarReservasCheckOut() async {
     setState(() => isLoadingCheckOut = true);
     try {
@@ -100,7 +111,6 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     }
   }
 
-  // ❌ CARGAR RESERVAS CANCELADAS
   Future<void> _cargarReservasCanceladas() async {
     setState(() => isLoadingCanceladas = true);
     try {
@@ -113,7 +123,6 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     }
   }
 
-  // ✅ REALIZAR CHECK-IN
   Future<void> _realizarCheckIn(int idReserva) async {
     _mostrarLoading();
     final resultado = await HotelApiService.realizarCheckIn(idReserva);
@@ -121,13 +130,15 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     
     if (resultado['exito']) {
       _mostrarExito(resultado['mensaje']);
-      _cargarReservasPendientes();
+      await Future.wait([
+        _cargarReservasPendientes(),
+        _cargarReservasCheckIn(),
+      ]);
     } else {
       _mostrarError(resultado['mensaje']);
     }
   }
 
-  // 🚪 REALIZAR CHECK-OUT
   Future<void> _realizarCheckOut(int idReserva) async {
     _mostrarLoading();
     final resultado = await HotelApiService.realizarCheckOut(idReserva);
@@ -135,18 +146,33 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     
     if (resultado['exito']) {
       _mostrarExito(resultado['mensaje']);
-      _cargarReservasCheckIn();
+      await Future.wait([
+        _cargarReservasCheckIn(),
+        _cargarReservasCheckOut(),
+      ]);
     } else {
       _mostrarError(resultado['mensaje']);
     }
   }
 
-  // ❌ CANCELAR CHECK-IN
   Future<void> _cancelarCheckIn(int idReserva) async {
-    final confirmar = await _mostrarDialogoConfirmacion(
-      titulo: 'Cancelar Check-In',
-      mensaje: '¿Cancelar el check-in? La reserva volverá a pendiente.',
-      textoBoton: 'Sí, cancelar',
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Deshacer check-in?'),
+        content: const Text('La reserva volverá a estado pendiente.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: warningColor),
+            child: const Text('Sí, deshacer'),
+          ),
+        ],
+      ),
     );
 
     if (confirmar != true) return;
@@ -157,20 +183,33 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     
     if (resultado['exito']) {
       _mostrarExito(resultado['mensaje']);
-      _cargarReservasCheckIn();
-      _cargarReservasPendientes();
+      await Future.wait([
+        _cargarReservasPendientes(),
+        _cargarReservasCheckIn(),
+      ]);
     } else {
       _mostrarError(resultado['mensaje']);
     }
   }
 
-  // ❌ CANCELAR RESERVA COMPLETA
   Future<void> _cancelarReserva(int idReserva) async {
-    final confirmar = await _mostrarDialogoConfirmacion(
-      titulo: 'Cancelar Reserva',
-      mensaje: '¿Cancelar esta reserva?\n\nEsta acción no se puede deshacer.',
-      textoBoton: 'Sí, cancelar reserva',
-      colorPeligro: true,
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar cancelación'),
+        content: const Text('¿Está seguro de cancelar esta reserva? Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: errorColor),
+            child: const Text('Sí, cancelar reserva'),
+          ),
+        ],
+      ),
     );
 
     if (confirmar != true) return;
@@ -181,20 +220,22 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     
     if (resultado['exito']) {
       _mostrarExito(resultado['mensaje']);
-      _cargarReservasPendientes();
+      await Future.wait([
+        _cargarReservasPendientes(),
+        _cargarReservasCanceladas(),
+      ]);
     } else {
       _mostrarError(resultado['mensaje']);
     }
   }
 
-  // 👁️ VER DETALLES
   void _verDetalles(ReservaHotel reserva) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.info_outline, color: Colors.blue.shade700),
+            Icon(Icons.hotel, color: primaryBlue),
             const SizedBox(width: 8),
             const Text('Detalles de Reserva'),
           ],
@@ -204,33 +245,34 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildDetalle('ID', reserva.idReservaHotel.toString()),
+              _buildDetalleItem('ID Reserva', reserva.idReservaHotel.toString()),
               const Divider(),
-              _buildDetalle('Cliente', reserva.cliente ?? 'N/A'),
+              _buildDetalleItem('Cliente', reserva.cliente ?? 'N/A'),
               if (reserva.clienteTelefono != null)
-                _buildDetalle('Teléfono', reserva.clienteTelefono!),
+                _buildDetalleItem('Teléfono', reserva.clienteTelefono!),
               const Divider(),
-              _buildDetalle('Habitación', reserva.habitacionTexto),
-              _buildDetalle('Personas', reserva.cantPersonas.toString()),
-              _buildDetalle('Inicio', reserva.fechaDisplay),
-              _buildDetalle('Fin', reserva.fechaFinDisplay),
+              _buildDetalleItem('Habitación', reserva.habitacionTexto),
+              _buildDetalleItem('Personas', reserva.cantPersonas.toString()),
+              _buildDetalleItem('Check-in', reserva.fechaDisplay),
+              _buildDetalleItem('Check-out', reserva.fechaFinDisplay),
               const Divider(),
               if (reserva.checkIn != null)
-                _buildDetalle('Check-in', reserva.checkIn!),
+                _buildDetalleItem('Check-in Realizado', reserva.checkIn!),
               if (reserva.checkOut != null)
-                _buildDetalle('Check-out', reserva.checkOut!),
+                _buildDetalleItem('Check-out Realizado', reserva.checkOut!),
               if (reserva.tiempoHospedado != null)
-                _buildDetalle('Duración', reserva.tiempoHospedado!.texto),
+                _buildDetalleItem('Tiempo Hospedado', reserva.tiempoHospedado!.texto),
               if (reserva.duracionEstadia != null)
-                _buildDetalle('Estadía', reserva.duracionEstadia!.texto),
+                _buildDetalleItem('Duración Estadía', reserva.duracionEstadia!.texto),
               const Divider(),
-              _buildDetalle('Estado', reserva.estadoTexto),
+              _buildDetalleItem('Estado', reserva.estadoTexto),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: primaryBlue),
             child: const Text('Cerrar'),
           ),
         ],
@@ -238,49 +280,27 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     );
   }
 
-  Widget _buildDetalle(String label, String value) {
+  Widget _buildDetalleItem(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontSize: 13)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool?> _mostrarDialogoConfirmacion({
-    required String titulo,
-    required String mensaje,
-    required String textoBoton,
-    bool colorPeligro = false,
-  }) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(titulo),
-        content: Text(mensaje),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorPeligro ? Colors.red : Colors.blue,
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 14),
             ),
-            child: Text(textoBoton),
           ),
         ],
       ),
@@ -291,8 +311,15 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+      builder: (context) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: CircularProgressIndicator(color: primaryBlue),
+        ),
       ),
     );
   }
@@ -302,7 +329,7 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(mensaje),
-        backgroundColor: Colors.red,
+        backgroundColor: errorColor,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -313,7 +340,7 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(mensaje),
-        backgroundColor: Colors.green,
+        backgroundColor: successColor,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -323,31 +350,69 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gestión de Hospedaje'),
-        backgroundColor: const Color(0xFF00BCD4),
+        title: const Text(
+          'Gestión de Hospedaje',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: primaryBlue,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
           indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
           isScrollable: true,
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.normal,
+            fontSize: 13,
+          ),
           tabs: const [
             Tab(text: 'Pendientes', icon: Icon(Icons.pending_actions, size: 20)),
-            Tab(text: 'Check In', icon: Icon(Icons.login, size: 20)),
-            Tab(text: 'Check Out', icon: Icon(Icons.logout, size: 20)),
+            Tab(text: 'Ingreso', icon: Icon(Icons.login, size: 20)),
+            Tab(text: 'Salida', icon: Icon(Icons.logout, size: 20)),
             Tab(text: 'Canceladas', icon: Icon(Icons.cancel, size: 20)),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildPendientesTab(),
-          _buildCheckInTab(),
-          _buildCheckOutTab(),
-          _buildCanceladasTab(),
-        ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF8FAFC),
+              Color(0xFFF1F5F9),
+            ],
+          ),
+        ),
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildPendientesTab(),
+            _buildCheckInTab(),
+            _buildCheckOutTab(),
+            _buildCanceladasTab(),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _cargarDatosSegunTab();
+          _mostrarExito('Datos actualizados manualmente');
+        },
+        backgroundColor: primaryBlue,
+        child: const Icon(Icons.refresh, color: Colors.white),
+        tooltip: 'Actualizar datos',
       ),
     );
   }
@@ -355,76 +420,125 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
   // 📋 TAB PENDIENTES
   Widget _buildPendientesTab() {
     if (isLoadingPendientes) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (reservasPendientes.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.event_available,
-        mensaje: 'No hay reservas pendientes',
+      return const Center(
+        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(primaryBlue)),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _cargarReservasPendientes,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: reservasPendientes.length,
-        itemBuilder: (context, index) {
-          final reserva = reservasPendientes[index];
-          return _buildReservaCard(
-            reserva: reserva,
-            color: Colors.orange.shade50,
-            iconColor: Colors.orange.shade700,
-            borderColor: Colors.orange.shade300,
-            acciones: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _realizarCheckIn(reserva.idReservaHotel),
-                  icon: const Icon(Icons.login, size: 18),
-                  label: const Text('Check In'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
+    return Column(
+      children: [
+        // NOTA INFORMATIVA
+        Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [lightBlue, mediumBlue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: primaryBlue.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              const SizedBox(width: 8),
+            ],
+            border: Border.all(color: primaryBlue.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: primaryBlue, size: 24),
+              const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _cancelarReserva(reserva.idReservaHotel),
-                  icon: const Icon(Icons.cancel, size: 18),
-                  label: const Text('Cancelar'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Reservas Pendientes',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: darkBlue,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                       'Se están listando todas las reservas programadas para el día de hoy. '
+                        'El sistema muestra las reservas que tienen la fecha actual dentro del rango '
+                        'de fecha de inicio y fin de la reserva.\n\n'
+                        'Puede realizar el check-in cuando el cliente llegue al establecimiento.',
+                      style: TextStyle(
+                        color: darkBlue.withOpacity(0.8),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        ),
+        
+        // LISTA DE RESERVAS
+        if (reservasPendientes.isEmpty)
+          Expanded(
+            child: _buildEmptyState(
+              icon: Icons.hotel,
+              mensaje: 'No hay reservas pendientes de check-in',
+              color: primaryBlue,
+            ),
+          )
+        else
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _cargarReservasPendientes,
+              backgroundColor: lightBlue,
+              color: primaryBlue,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                itemCount: reservasPendientes.length,
+                itemBuilder: (context, index) {
+                  final reserva = reservasPendientes[index];
+                  return _buildReservaCard(
+                    reserva: reserva,
+                    color: lightBlue,
+                    iconColor: primaryBlue,
+                    borderColor: primaryBlue.withOpacity(0.3),
+                    mostrarCheckIn: true,
+                    mostrarCheckOut: false,
+                    mostrarDeshacer: false,
+                    mostrarCancelar: true,
+                  );
+                },
+              ),
+            ),
+          ),
+      ],
     );
   }
 
   // 🏨 TAB CHECK-IN
   Widget _buildCheckInTab() {
     if (isLoadingCheckIn) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(primaryBlue)),
+      );
     }
 
     if (reservasCheckIn.isEmpty) {
       return _buildEmptyState(
         icon: Icons.hotel,
         mensaje: 'No hay reservas en curso',
+        color: primaryBlue,
       );
     }
 
     return RefreshIndicator(
       onRefresh: _cargarReservasCheckIn,
+      backgroundColor: lightBlue,
+      color: primaryBlue,
       child: ListView.builder(
         padding: const EdgeInsets.all(12),
         itemCount: reservasCheckIn.length,
@@ -432,36 +546,13 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
           final reserva = reservasCheckIn[index];
           return _buildReservaCard(
             reserva: reserva,
-            color: Colors.blue.shade50,
-            iconColor: Colors.blue.shade700,
-            borderColor: Colors.blue.shade300,
-            acciones: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _realizarCheckOut(reserva.idReservaHotel),
-                  icon: const Icon(Icons.logout, size: 18),
-                  label: const Text('Check Out'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _cancelarCheckIn(reserva.idReservaHotel),
-                  icon: const Icon(Icons.undo, size: 18),
-                  label: const Text('Deshacer'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.orange,
-                    side: const BorderSide(color: Colors.orange),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ],
+            color: Color(0xFFE0E7FF),
+            iconColor: infoColor,
+            borderColor: infoColor.withOpacity(0.3),
+            mostrarCheckIn: false,
+            mostrarCheckOut: true,
+            mostrarDeshacer: true,
+            mostrarCancelar: false,
           );
         },
       ),
@@ -471,18 +562,23 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
   // ✅ TAB CHECK-OUT
   Widget _buildCheckOutTab() {
     if (isLoadingCheckOut) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(primaryBlue)),
+      );
     }
 
     if (reservasCheckOut.isEmpty) {
       return _buildEmptyState(
         icon: Icons.check_circle_outline,
         mensaje: 'No hay reservas finalizadas',
+        color: primaryBlue,
       );
     }
 
     return RefreshIndicator(
       onRefresh: _cargarReservasCheckOut,
+      backgroundColor: lightBlue,
+      color: primaryBlue,
       child: ListView.builder(
         padding: const EdgeInsets.all(12),
         itemCount: reservasCheckOut.length,
@@ -490,10 +586,13 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
           final reserva = reservasCheckOut[index];
           return _buildReservaCard(
             reserva: reserva,
-            color: Colors.green.shade50,
-            iconColor: Colors.green.shade700,
-            borderColor: Colors.green.shade300,
-            acciones: [],
+            color: Color(0xFFD1FAE5),
+            iconColor: successColor,
+            borderColor: successColor.withOpacity(0.3),
+            mostrarCheckIn: false,
+            mostrarCheckOut: false,
+            mostrarDeshacer: false,
+            mostrarCancelar: false,
           );
         },
       ),
@@ -503,18 +602,23 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
   // ❌ TAB CANCELADAS
   Widget _buildCanceladasTab() {
     if (isLoadingCanceladas) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(primaryBlue)),
+      );
     }
 
     if (reservasCanceladas.isEmpty) {
       return _buildEmptyState(
-        icon: Icons.cancel_outlined,
+        icon: Icons.hotel,
         mensaje: 'No hay reservas canceladas',
+        color: primaryBlue,
       );
     }
 
     return RefreshIndicator(
       onRefresh: _cargarReservasCanceladas,
+      backgroundColor: lightBlue,
+      color: primaryBlue,
       child: ListView.builder(
         padding: const EdgeInsets.all(12),
         itemCount: reservasCanceladas.length,
@@ -522,31 +626,37 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
           final reserva = reservasCanceladas[index];
           return _buildReservaCard(
             reserva: reserva,
-            color: Colors.red.shade50,
-            iconColor: Colors.red.shade700,
-            borderColor: Colors.red.shade300,
-            acciones: [],
+            color: Color(0xFFFEE2E2),
+            iconColor: errorColor,
+            borderColor: errorColor.withOpacity(0.3),
+            mostrarCheckIn: false,
+            mostrarCheckOut: false,
+            mostrarDeshacer: false,
+            mostrarCancelar: false,
           );
         },
       ),
     );
   }
 
-  // 🎴 CARD DE RESERVA
+  // 🎴 CARD DE RESERVA (ESTILO SIMILAR A EVENTOS)
   Widget _buildReservaCard({
     required ReservaHotel reserva,
     required Color color,
     required Color iconColor,
     required Color borderColor,
-    required List<Widget> acciones,
+    required bool mostrarCheckIn,
+    required bool mostrarCheckOut,
+    required bool mostrarDeshacer,
+    required bool mostrarCancelar,
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: color,
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: borderColor, width: 1),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: borderColor, width: 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -556,40 +666,73 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    color: iconColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: iconColor.withOpacity(0.3)),
                   ),
-                  child: Icon(Icons.hotel, color: iconColor, size: 28),
+                  child: Icon(Icons.hotel, color: iconColor, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        reserva.cliente ?? 'Sin nombre',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              reserva.cliente ?? 'Cliente Desconocido',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: darkBlue,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          _buildEstadoChip(reserva),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.meeting_room, size: 14, color: Colors.grey.shade600),
+                          const SizedBox(width: 4),
+                          Text(
+                            reserva.habitacionTexto,
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(Icons.people, size: 14, color: Colors.grey.shade600),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${reserva.cantPersonas}',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text(
-                            'Hab: ${reserva.habitacionTexto}',
-                            style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(Icons.people, size: 16, color: Colors.grey.shade600),
+                          Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
                           const SizedBox(width: 4),
                           Text(
-                            '${reserva.cantPersonas}',
-                            style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                            '${reserva.fechaDisplay} - ${reserva.fechaFinDisplay}',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -598,7 +741,7 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
                         Text(
                           '⏱️ ${reserva.tiempoHospedado!.texto}',
                           style: TextStyle(
-                            color: Colors.blue.shade700,
+                            color: infoColor,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -607,9 +750,9 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
                       if (reserva.duracionEstadia != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          '✅ ${reserva.duracionEstadia!.texto}',
+                          '🏨 ${reserva.duracionEstadia!.texto}',
                           style: TextStyle(
-                            color: Colors.green.shade700,
+                            color: successColor,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -619,19 +762,92 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.remove_red_eye),
-                  color: Colors.blue.shade700,
+                  icon: Icon(Icons.remove_red_eye, color: primaryBlue),
                   onPressed: () => _verDetalles(reserva),
+                  tooltip: 'Ver detalles',
                 ),
               ],
             ),
-            if (acciones.isNotEmpty) ...[
+            if (mostrarCheckIn || mostrarCheckOut || mostrarDeshacer || mostrarCancelar) ...[
               const SizedBox(height: 12),
-              const Divider(height: 1),
+              const Divider(height: 1, color: Colors.grey),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: acciones,
+                children: [
+                  if (mostrarCheckIn) ...[
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _realizarCheckIn(reserva.idReservaHotel),
+                        icon: const Icon(Icons.login, size: 18),
+                        label: const Text('Ingreso'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: successColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                    if (mostrarCancelar) const SizedBox(width: 8),
+                  ],
+                  if (mostrarCheckOut) ...[
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _realizarCheckOut(reserva.idReservaHotel),
+                        icon: const Icon(Icons.logout, size: 18),
+                        label: const Text('Salida'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: infoColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                    if (mostrarDeshacer) const SizedBox(width: 8),
+                  ],
+                  if (mostrarDeshacer) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _cancelarCheckIn(reserva.idReservaHotel),
+                        icon: const Icon(Icons.undo, size: 18),
+                        label: const Text('Deshacer'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: warningColor,
+                          side: BorderSide(color: warningColor),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (mostrarCancelar) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _cancelarReserva(reserva.idReservaHotel),
+                        icon: const Icon(Icons.cancel, size: 18),
+                        label: const Text('Cancelar'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: errorColor,
+                          side: BorderSide(color: errorColor),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ],
@@ -641,19 +857,73 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
   }
 
   // 📭 ESTADO VACÍO
-  Widget _buildEmptyState({required IconData icon, required String mensaje}) {
+  Widget _buildEmptyState({required IconData icon, required String mensaje, required Color color}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 80, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withOpacity(0.3), width: 2),
+            ),
+            child: Icon(icon, size: 60, color: color),
+          ),
+          const SizedBox(height: 20),
           Text(
             mensaje,
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  // 🏷️ CHIP DE ESTADO
+  Widget _buildEstadoChip(ReservaHotel reserva) {
+    Color backgroundColor;
+    Color textColor;
+    String texto;
+    
+    if (reserva.checkOut != null) {
+      backgroundColor = successColor.withOpacity(0.15);
+      textColor = successColor;
+      texto = 'Finalizado';
+    } else if (reserva.checkIn != null) {
+      backgroundColor = infoColor.withOpacity(0.15);
+      textColor = infoColor;
+      texto = 'En Curso';
+    } else if (reserva.estado == 'C') {
+      backgroundColor = errorColor.withOpacity(0.15);
+      textColor = errorColor;
+      texto = 'Cancelado';
+    } else {
+      backgroundColor = warningColor.withOpacity(0.15);
+      textColor = warningColor;
+      texto = 'Pendiente';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: textColor.withOpacity(0.4), width: 1),
+      ),
+      child: Text(
+        texto,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
       ),
     );
   }

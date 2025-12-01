@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/usuario_model.dart';
+import '../utils/theme_by_role.dart'; // Importar la nueva clase
 
 class PerfilScreen extends StatelessWidget {
   final Usuario usuario;
@@ -8,36 +9,52 @@ class PerfilScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = ThemeByRole.getPrimaryColor(usuario.rol);
+    final secondaryColor = ThemeByRole.getSecondaryColor(usuario.rol);
+    final backgroundColor = ThemeByRole.getBackgroundColor(usuario.rol);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi Perfil'),
-        backgroundColor: const Color(0xFF00BCD4),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Editar perfil')),
-              );
-            },
-            tooltip: 'Editar perfil',
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [primaryColor, secondaryColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ],
+        ),
+        title: const Text(
+          'Mi Perfil',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        foregroundColor: Colors.white,
       ),
+      backgroundColor: backgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Header con foto de perfil
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(30),
+              padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF00BCD4),
-                    const Color(0xFF00ACC1),
-                  ],
+                  colors: [primaryColor, secondaryColor],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -46,14 +63,21 @@ class PerfilScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: CircleAvatar(
                       radius: 60,
                       backgroundColor: Colors.white,
                       child: Icon(
-                        Icons.person,
+                        Icons.person_rounded,
                         size: 60,
-                        color: const Color(0xFF00BCD4),
+                        color: primaryColor,
                       ),
                     ),
                   ),
@@ -64,18 +88,23 @@ class PerfilScreen extends StatelessWidget {
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 20,
+                      vertical: 10,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.5),
+                        width: 1.5,
+                      ),
                     ),
                     child: Text(
                       usuario.rol,
@@ -83,6 +112,7 @@ class PerfilScreen extends StatelessWidget {
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -99,72 +129,61 @@ class PerfilScreen extends StatelessWidget {
                   const Text(
                     'Información Personal',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF00838F),
+                      color: Color(0xFF1F2937),
+                      letterSpacing: 0.3,
                     ),
                   ),
                   const SizedBox(height: 20),
                   
                   _buildInfoCard(
-                    icon: Icons.badge,
+                    icon: Icons.badge_rounded,
                     title: 'CI',
                     value: usuario.ci.toString(),
-                    color: Colors.blue,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+                    ),
                   ),
                   
                   _buildInfoCard(
-                    icon: Icons.email,
+                    icon: Icons.email_rounded,
                     title: 'Email',
                     value: usuario.email,
-                    color: Colors.orange,
+                    gradient: const LinearGradient(
+                      colors: [ThemeByRole.sharedAccentAmber, ThemeByRole.sharedAccentCoral],
+                    ),
                   ),
                   
                   _buildInfoCard(
-                    icon: Icons.phone,
+                    icon: Icons.phone_rounded,
                     title: 'Teléfono',
                     value: usuario.telefono.toString(),
-                    color: Colors.green,
+                    gradient: LinearGradient(
+                      colors: [primaryColor, secondaryColor],
+                    ),
                   ),
                   
                   _buildInfoCard(
-                    icon: Icons.assignment,
+                    icon: Icons.assignment_rounded,
                     title: 'Rol',
                     value: usuario.rol,
-                    color: Colors.purple,
+                    gradient: const LinearGradient(
+                      colors: [ThemeByRole.sharedAccentLavender, ThemeByRole.sharedSoftPink],
+                    ),
                   ),
                   
                   _buildInfoCard(
-                    icon: Icons.check_circle,
+                    icon: Icons.check_circle_rounded,
                     title: 'Estado',
                     value: usuario.estado == 'A' ? 'Activo' : 'Inactivo',
-                    color: usuario.estado == 'A' ? Colors.green : Colors.red,
-                  ),
-                  
-                  const SizedBox(height: 30),
-                  
-                  // Botón de cambiar contraseña
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Cambiar contraseña'),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.lock),
-                      label: const Text('Cambiar Contraseña'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00BCD4),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    gradient: usuario.estado == 'A' 
+                      ? LinearGradient(
+                          colors: [primaryColor, secondaryColor],
+                        )
+                      : const LinearGradient(
+                          colors: [ThemeByRole.sharedErrorRed, ThemeByRole.sharedSoftPink],
                         ),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -179,44 +198,62 @@ class PerfilScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required String value,
-    required Color color,
+    required Gradient gradient,
   }) {
+    final primaryColor = (gradient as LinearGradient).colors.first;
+    
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 14),
+      elevation: 6,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+      shadowColor: primaryColor.withOpacity(0.25),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(18),
+          leading: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 26,
+            ),
           ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              letterSpacing: 0.5,
+            ),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F2937),
+                letterSpacing: 0.2,
+              ),
             ),
           ),
         ),

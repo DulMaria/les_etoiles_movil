@@ -6,57 +6,99 @@ class NotificacionesScreen extends StatelessWidget {
   
   const NotificacionesScreen({Key? key, required this.usuario}) : super(key: key);
 
+  // Definir colores localmente
+  static const Color accentAmber = Color(0xFFF59E0B);
+  static const Color accentCoral = Color(0xFFFF6B6B);
+  static const Color accentMint = Color(0xFF10B981);
+  static const Color vibrantTeal = Color(0xFF14B8A6);
+  static const Color infoBlue = Color(0xFF3B82F6);
+  static const Color errorRed = Color(0xFFEF4444);
+  static const Color softPink = Color(0xFFEC4899);
+  static const Color backgroundLight = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificaciones'),
-        backgroundColor: const Color(0xFF00BCD4),
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [accentAmber, accentCoral],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: const Text(
+          'Notificaciones',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.mark_email_read),
+            icon: const Icon(Icons.mark_email_read_rounded),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Marcar todas como leídas')),
+                SnackBar(
+                  content: const Text('Todas marcadas como leídas'),
+                  backgroundColor: accentMint,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               );
             },
             tooltip: 'Marcar todas como leídas',
           ),
         ],
       ),
+      backgroundColor: backgroundLight,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildNotificationCard(
-            icon: Icons.check_circle,
+            icon: Icons.check_circle_rounded,
             title: 'Reserva Confirmada',
             message: 'Tu reserva para el 25 de Enero ha sido confirmada',
             time: 'Hace 2 horas',
-            color: Colors.green,
+            gradient: LinearGradient(
+              colors: [accentMint, vibrantTeal],
+            ),
             isRead: false,
           ),
           _buildNotificationCard(
-            icon: Icons.info,
+            icon: Icons.info_rounded,
             title: 'Recordatorio',
             message: 'Tu evento es mañana a las 3:00 PM',
             time: 'Hace 5 horas',
-            color: Colors.blue,
+            gradient: LinearGradient(
+              colors: [infoBlue, const Color(0xFF60A5FA)],
+            ),
             isRead: false,
           ),
           _buildNotificationCard(
-            icon: Icons.celebration,
+            icon: Icons.celebration_rounded,
             title: 'Promoción Especial',
             message: '20% de descuento en hospedajes este fin de semana',
             time: 'Hace 1 día',
-            color: Colors.orange,
+            gradient: LinearGradient(
+              colors: [accentAmber, accentCoral],
+            ),
             isRead: true,
           ),
           _buildNotificationCard(
-            icon: Icons.warning,
+            icon: Icons.warning_rounded,
             title: 'Actualización Importante',
             message: 'Nuevas políticas de reservación disponibles',
             time: 'Hace 2 días',
-            color: Colors.red,
+            gradient: LinearGradient(
+              colors: [errorRed, softPink],
+            ),
             isRead: true,
           ),
         ],
@@ -69,35 +111,47 @@ class NotificacionesScreen extends StatelessWidget {
     required String title,
     required String message,
     required String time,
-    required Color color,
+    required Gradient gradient,
     required bool isRead,
   }) {
+    // Extraer el primer color del gradiente para el borde y el punto
+    final primaryColor = (gradient as LinearGradient).colors.first;
+    
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: isRead ? 1 : 3,
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: isRead ? 4 : 8,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
+      shadowColor: primaryColor.withOpacity(0.25),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isRead ? Colors.transparent : color.withOpacity(0.3),
+            color: isRead ? Colors.grey.shade300 : primaryColor.withOpacity(0.5),
             width: 2,
           ),
+          color: Colors.white,
         ),
         child: ListTile(
           contentPadding: const EdgeInsets.all(16),
           leading: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Icon(
               icon,
-              color: color,
-              size: 28,
+              color: Colors.white,
+              size: 26,
             ),
           ),
           title: Row(
@@ -106,18 +160,27 @@ class NotificacionesScreen extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isRead ? FontWeight.w500 : FontWeight.bold,
+                    fontSize: 17,
+                    fontWeight: isRead ? FontWeight.w600 : FontWeight.bold,
+                    color: const Color(0xFF1F2937),
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
               if (!isRead)
                 Container(
-                  width: 10,
-                  height: 10,
+                  width: 12,
+                  height: 12,
                   decoration: BoxDecoration(
-                    color: color,
+                    gradient: gradient,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.5),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      ),
+                    ],
                   ),
                 ),
             ],
@@ -131,15 +194,27 @@ class NotificacionesScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade700,
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                time,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 14,
+                    color: Colors.grey.shade500,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

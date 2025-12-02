@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/usuario_model.dart';
-import '../widgets/custom_drawer.dart';
-import '../utils/theme_by_role.dart';
-import 'reserva_hospedaje_screen.dart';
-import 'reserva_eventos_screen.dart';
-import 'notificaciones_screen.dart';
-import 'perfil_screen.dart';
+import '../../models/Usuarios/usuario_model.dart';
+import '../../widgets/ManuPlegable.dart';
+import '../../utils/ColoresRol.dart';
+import '../Hospedaje/reserva_hospedaje_screen.dart';
+import '../Eventos/reserva_eventos_screen.dart';
+import '../Notificacion/notificaciones_screen.dart';
+import '../Perfil/perfil_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final Usuario usuario;
@@ -15,7 +15,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primaryColor = ThemeByRole.getPrimaryColor(usuario.rol);
-    final secondaryColor = ThemeByRole.getSecondaryColor(usuario.rol);
+   // final secondaryColor = ThemeByRole.getSecondaryColor(usuario.rol);
     final backgroundColor = ThemeByRole.getBackgroundColor(usuario.rol);
 
     return Scaffold(

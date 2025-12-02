@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/usuario_model.dart';
-import '../utils/theme_by_role.dart'; // Importar la nueva clase
+import '../../models/Usuarios/usuario_model.dart';
+import '../../utils/ColoresRol.dart'; // Importar la nueva clase
 
 class PerfilScreen extends StatelessWidget {
   final Usuario usuario;

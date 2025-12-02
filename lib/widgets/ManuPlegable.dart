@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/usuario_model.dart';
-import '../service/auth_service.dart';
-import '../utils/theme_by_role.dart'; // Importar la nueva clase
-import '../screens/login_screen.dart';
-import '../screens/reserva_hospedaje_screen.dart';
-import '../screens/reserva_eventos_screen.dart';
-import '../screens/notificaciones_screen.dart';
-import '../screens/perfil_screen.dart';
+import '../models/Usuarios/usuario_model.dart';
+import '../service/Usuarios/AutenticacionServicio.dart';
+import '../utils/ColoresRol.dart'; // Importar la nueva clase
+import '../screens/InicioSesion/InicioSesion_Screen.dart';
+import '../screens/Hospedaje/reserva_hospedaje_screen.dart';
+import '../screens/Eventos/reserva_eventos_screen.dart';
+import '../screens/Notificacion/notificaciones_screen.dart';
+import '../screens/Perfil/perfil_screen.dart';
 
 class CustomDrawer extends StatelessWidget {
   final Usuario usuario;

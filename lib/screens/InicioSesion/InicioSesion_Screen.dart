@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'dart:math' as math;
-import '../service/auth_service.dart';
-import '../models/usuario_model.dart';
-import '../utils/validaciones.dart';
-import 'dashboard_screen.dart';
+import '../../service/Usuarios/AutenticacionServicio.dart';
+import '../../models/Usuarios/usuario_model.dart';
+import '../../utils/validaciones.dart';
+import '../Deshboard/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

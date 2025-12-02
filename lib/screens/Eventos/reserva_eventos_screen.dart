@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/usuario_model.dart';
-import '../models/reserva_evento_model.dart';
-import '../service/evento_api_service.dart';
+import '../../models/Usuarios/usuario_model.dart';
+import '../../models/Eventos/reserva_evento_model.dart';
+import '../../service/Eventos/evento_api_service.dart';
 import 'dart:async';
 
 class ReservaEventosScreen extends StatefulWidget {

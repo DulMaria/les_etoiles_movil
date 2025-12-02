@@ -109,12 +109,15 @@ class AuthService {
         if (refreshed) {
           return getMiPerfil(); // Reintentar
         }
+        // No se pudo refrescar
         return {'success': false, 'message': 'Sesión expirada'};
       } else {
+        // Otros errores
         return {'success': false, 'message': 'Error al obtener perfil'};
       }
     } catch (e) {
-      return {'success': false, 'message': 'Error: $e'};
+      // Manejo de errores de conexión
+      return {'success': false, 'message': 'Error: Hubo conflicto al conectar con el servidor  ERROR:500'};
     }
   }
 

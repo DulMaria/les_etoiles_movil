@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/reserva_hotel_model.dart';
+import '../../models/Hospedaje/reserva_hotel_model.dart';
 
 class HotelApiService {
   static const String baseUrl = 'https://proyecto-iii-les-toiles-de-l-eau.vercel.app/api';

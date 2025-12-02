@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="les_etoiles_movil"
+        android:label="Piscina Playa Azul"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -1,7 +1,7 @@
 // service/evento_api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/reserva_evento_model.dart';
+import '../../models/Eventos/reserva_evento_model.dart';
 
 class EventoApiService {
   static const String baseUrl = 'https://proyecto-iii-les-toiles-de-l-eau.vercel.app/api';
@@ -162,13 +162,13 @@ class EventoApiService {
       if (response.statusCode == 200) {
         return {
           'exito': true,
-          'mensaje': data['mensaje'] ?? 'Check-out realizado correctamente',
+          'mensaje': data['mensaje'] ?? 'Salida realizada correctamente',
           'data': data,
         };
       } else {
         return {
           'exito': false,
-          'mensaje': data['error'] ?? 'Error al realizar check-out',
+          'mensaje': data['error'] ?? 'Error al realizar la salida',
           'data': data,
         };
       }
@@ -194,13 +194,13 @@ class EventoApiService {
       if (response.statusCode == 200) {
         return {
           'exito': true,
-          'mensaje': data['mensaje'] ?? 'Check-in cancelado correctamente',
+          'mensaje': data['mensaje'] ?? 'Ingreso cancelado correctamente',
           'data': data,
         };
       } else {
         return {
           'exito': false,
-          'mensaje': data['error'] ?? 'Error al cancelar check-in',
+          'mensaje': data['error'] ?? 'Error al cancelar ingreso',
           'data': data,
         };
       }
@@ -239,7 +239,8 @@ class EventoApiService {
     } catch (e) {
       return {
         'exito': false,
-        'mensaje': 'Error de conexión: $e',
+        /// Manejo de errores de conexión en cancelación con el servidor
+        'mensaje': 'Error de conexión con el servidor: $e',
       };
     }
   }

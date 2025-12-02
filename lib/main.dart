@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'service/auth_service.dart';
-import 'models/usuario_model.dart';
+import 'screens/InicioSesion/InicioSesion_Screen.dart';
+import 'screens/Deshboard/dashboard_screen.dart';
+import 'service/Usuarios/AutenticacionServicio.dart';
+import 'models/Usuarios/usuario_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -368,59 +368,8 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       
-                      const SizedBox(height: 60),
-                      
-                      // Indicador circular giratorio
-                      FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: AnimatedBuilder(
-                          animation: _waveController,
-                          builder: (context, child) {
-                            return Transform.rotate(
-                              angle: _waveController.value * 2 * math.pi,
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(0xFF00BFA5), // Turquesa
-                                    width: 3,
-                                  ),
-                                  gradient: const SweepGradient(
-                                    colors: [
-                                      Color.fromARGB(255, 113, 255, 106), // Verde agua
-                                      Color.fromARGB(255, 0, 221, 192), // Turquesa
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      const SizedBox(height: 60)      
                     ],
-                  ),
-                ),
-                
-                // Copyright en la parte inferior
-                Positioned(
-                  bottom: 30,
-                  left: 0,
-                  right: 0,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: const Text(
-                      'Playa Azul © 2025',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 1.0,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
                   ),
                 ),
               ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/usuario_model.dart';
-import '../models/reserva_hotel_model.dart';
-import '../service/hotel_api_service.dart';
+import '../../models/Usuarios/usuario_model.dart';
+import '../../models/Hospedaje/reserva_hotel_model.dart';
+import '../../service/Hospedaje/hotel_api_service.dart';
 //import '../screens/dashboard_screen.dart';
 
 class ReservaHospedajeScreen extends StatefulWidget {

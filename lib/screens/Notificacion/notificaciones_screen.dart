@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/usuario_model.dart';
+import '../../models/Usuarios/usuario_model.dart';
 
 class NotificacionesScreen extends StatelessWidget {
   final Usuario usuario;

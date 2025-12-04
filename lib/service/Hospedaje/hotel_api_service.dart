@@ -104,13 +104,13 @@ class HotelApiService {
       if (response.statusCode == 200) {
         return {
           'exito': true,
-          'mensaje': data['mensaje'] ?? 'Check-in realizado',
+          'mensaje': data['mensaje'] ?? 'ingreso realizado',
           'data': data,
         };
       } else {
         return {
           'exito': false,
-          'mensaje': data['error'] ?? 'Error al realizar check-in',
+          'mensaje': data['error'] ?? 'Error al realizar ingreso',
           'data': data,
         };
       }

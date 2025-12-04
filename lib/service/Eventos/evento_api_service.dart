@@ -129,13 +129,13 @@ class EventoApiService {
       if (response.statusCode == 200) {
         return {
           'exito': true,
-          'mensaje': data['mensaje'] ?? 'Check-in realizado correctamente',
+          'mensaje': data['mensaje'] ?? 'Ingreso realizado correctamente',
           'data': data,
         };
       } else {
         return {
           'exito': false,
-          'mensaje': data['error'] ?? 'Error al realizar check-in',
+          'mensaje': data['error'] ?? 'Error al realizar ingreso',
           'data': data,
         };
       }

@@ -6,6 +6,7 @@ import '../../service/Usuarios/AutenticacionServicio.dart';
 import '../../models/Usuarios/usuario_model.dart';
 import '../../utils/validaciones.dart';
 import '../Deshboard/dashboard_screen.dart';
+import '../../utils/SesionManager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -49,6 +50,36 @@ class _LoginScreenState extends State<LoginScreen>
     )..repeat();
 
     _fadeController.forward();
+    
+    // Verificar si hay sesión activa al iniciar
+    _checkExistingSession();
+  }
+
+  Future<void> _checkExistingSession() async {
+    final isLoggedIn = await SessionManager.isLoggedIn();
+    
+    if (isLoggedIn) {
+      final isExpired = await SessionManager.isSessionExpired();
+      
+      if (!isExpired && mounted) {
+        final userData = await SessionManager.getUserData();
+        
+        if (userData != null) {
+          try {
+            final usuario = Usuario.fromJson(userData);
+            _navigateToDashboard(usuario);
+          } catch (e) {
+            print('❌ Error al recuperar usuario: $e');
+            await SessionManager.logout();
+          }
+        }
+      } else if (isExpired) {
+        await SessionManager.logout();
+        if (mounted) {
+          _showSessionExpiredSnackbar();
+        }
+      }
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -68,48 +99,96 @@ class _LoginScreenState extends State<LoginScreen>
 
     setState(() => _isLoading = true);
 
-    final result = await _authService.login(
-      _usernameController.text.trim(),
-      _passwordController.text,
-    );
+    try {
+      final result = await _authService.login(
+        _usernameController.text.trim(),
+        _passwordController.text,
+      );
 
-    if (result['success']) {
-      final perfilResult = await _authService.getMiPerfil();
+      if (result['success']) {
+        final perfilResult = await _authService.getMiPerfil();
 
-      setState(() => _isLoading = false);
+        setState(() => _isLoading = false);
 
-      if (mounted) {
-        if (perfilResult['success']) {
-          final usuario = Usuario.fromJson(perfilResult['data']);
+        if (mounted) {
+          if (perfilResult['success']) {
+            final usuario = Usuario.fromJson(perfilResult['data']);
 
-          _showSuccessSnackbar();
+            // ✅ CORREGIDO: Usar el método login() que incluye todo
+            await SessionManager.login(perfilResult['data']);
 
-          await Future.delayed(const Duration(milliseconds: 800));
+            _showSuccessSnackbar();
 
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  DashboardScreen(usuario: usuario),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-              transitionDuration: const Duration(milliseconds: 500),
-            ),
-          );
-        } else {
-          _showErrorSnackbar(
-              'Error al cargar perfil: ${perfilResult['message']}');
+            await Future.delayed(const Duration(milliseconds: 800));
+
+            _navigateToDashboard(usuario);
+          } else {
+            _showErrorSnackbar(
+                'Error al cargar perfil: ${perfilResult['message']}');
+          }
+        }
+      } else {
+        setState(() => _isLoading = false);
+
+        if (mounted) {
+          _showErrorSnackbar(result['message'] ?? 'Error de autenticación');
         }
       }
-    } else {
+    } catch (e) {
       setState(() => _isLoading = false);
-
       if (mounted) {
-        _showErrorSnackbar(result['message'] ?? 'Error de autenticación');
+        _showErrorSnackbar('Error de conexión: $e');
       }
     }
+  }
+
+  void _navigateToDashboard(Usuario usuario) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            DashboardScreen(usuario: usuario),
+        transitionsBuilder:
+            (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  void _showSessionExpiredSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.timer_off, color: Colors.orange, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.orange.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   void _showSuccessSnackbar() {
@@ -321,7 +400,7 @@ class _LoginScreenState extends State<LoginScreen>
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return null; // Validación de vacío se hace antes
+                  return null;
                 }
                 final validation = LoginValidations.validateUsuario(value);
                 return validation.isValid ? null : validation.error;
@@ -341,7 +420,7 @@ class _LoginScreenState extends State<LoginScreen>
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return null; // Validación de vacío se hace antes
+                  return null;
                 }
                 final validation = LoginValidations.validatePassword(value);
                 return validation.isValid ? null : validation.error;
@@ -400,7 +479,6 @@ class _LoginScreenState extends State<LoginScreen>
           obscureText: isPassword ? _obscurePassword : false,
           maxLength: maxLength,
           inputFormatters: [
-            // Prevenir múltiples espacios consecutivos
             FilteringTextInputFormatter.deny(RegExp(r'\s{2,}')),
           ],
           style: TextStyle(
@@ -435,7 +513,7 @@ class _LoginScreenState extends State<LoginScreen>
                   )
                 : null,
             border: InputBorder.none,
-            counterText: '', // Ocultar contador de caracteres
+            counterText: '',
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
@@ -528,7 +606,6 @@ class _LoginScreenState extends State<LoginScreen>
   }
 }
 
-// Painter mejorado para olas más visibles y pronunciadas
 class WavePainter extends CustomPainter {
   final double animationValue;
 

@@ -501,10 +501,10 @@ class _ReservaEventosScreenState extends State<ReservaEventosScreen> with Single
                 _buildDetalleItem('Teléfono', evento.clienteTelefono!),
               const Divider(),
               _buildDetalleItem('Fecha', evento.fechaDisplay),
-              _buildDetalleItem('Hora Inicio BD', '${evento.horaIni} (UTC)'),
-              _buildDetalleItem('Hora Fin BD', '${evento.horaFin} (UTC)'),
-              _buildDetalleItem('Hora Inicio Local', _ajustarHoraDesdeBD(evento.horaIni)),
-              _buildDetalleItem('Hora Fin Local', _ajustarHoraDesdeBD(evento.horaFin)),
+              //_buildDetalleItem('Hora Inicio BD', '${evento.horaIni} (UTC)'),
+             // _buildDetalleItem('Hora Fin BD', '${evento.horaFin} (UTC)'),
+              _buildDetalleItem('Hora Inicio ', _ajustarHoraDesdeBD(evento.horaIni)),
+              _buildDetalleItem('Hora Fin ', _ajustarHoraDesdeBD(evento.horaFin)),
               _buildDetalleItem('Personas', evento.cantPersonas.toString()),
               _buildDetalleItem('Servicios', evento.totalServicios.toString()),
               
@@ -1105,6 +1105,7 @@ class _ReservaEventosScreenState extends State<ReservaEventosScreen> with Single
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  // estos botones dependen del estado del evento
                   if (mostrarCheckIn) ...[
                     Expanded(
                       child: ElevatedButton.icon(
@@ -1124,6 +1125,7 @@ class _ReservaEventosScreenState extends State<ReservaEventosScreen> with Single
                     ),
                     if (mostrarCancelar) const SizedBox(width: 8),
                   ],
+                  // este botón aparece si no se puede hacer check-in aún
                   if (!mostrarCheckIn && evento.checkIn == null && evento.estado != 'C' && !debeCancelarse) ...[
                     Expanded(
                       child: ElevatedButton.icon(
@@ -1161,6 +1163,7 @@ class _ReservaEventosScreenState extends State<ReservaEventosScreen> with Single
                     ),
                     if (mostrarDeshacer) const SizedBox(width: 8),
                   ],
+                  // este botón solo aparece si ya se hizo check-in
                   if (mostrarDeshacer) ...[
                     Expanded(
                       child: OutlinedButton.icon(

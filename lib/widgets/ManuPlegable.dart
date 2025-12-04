@@ -5,7 +5,7 @@ import '../utils/ColoresRol.dart'; // Importar la nueva clase
 import '../screens/InicioSesion/InicioSesion_Screen.dart';
 import '../screens/Hospedaje/reserva_hospedaje_screen.dart';
 import '../screens/Eventos/reserva_eventos_screen.dart';
-import '../screens/Notificacion/notificaciones_screen.dart';
+//import '../screens/Notificacion/notificaciones_screen.dart';
 import '../screens/Perfil/perfil_screen.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -159,7 +159,7 @@ class CustomDrawer extends StatelessWidget {
                   
                   const Divider(height: 1, thickness: 1),
                   
-                  _buildDrawerItem(
+                 /* _buildDrawerItem(
                     context,
                     icon: Icons.notifications,
                     title: 'Notificaciones',
@@ -175,7 +175,7 @@ class CustomDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                  
+                  */
                   _buildDrawerItem(
                     context,
                     icon: Icons.person,

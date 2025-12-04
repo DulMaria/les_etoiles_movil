@@ -1,5 +1,4 @@
 // models/reserva_evento_model.dart
-
 class ReservaEvento {
   final int idReservasEvento;
   final int cantPersonas;
@@ -60,6 +59,8 @@ class ReservaEvento {
     this.duracionReal,
     this.duracionProgramada,
   });
+  // Parse from JSON para crear una instancia de ReservaEvento y asignar valores predeterminados 
+  //que eviten errores si faltan campos en el JSONde
 
   factory ReservaEvento.fromJson(Map<String, dynamic> json) {
     return ReservaEvento(
@@ -121,19 +122,19 @@ class ReservaEvento {
   }
 
   String get fechaDisplay {
-    return fecha.isNotEmpty ? fecha : 'N/A';
+    return fecha.isNotEmpty ? fecha : 'N/A';//es una cadena vacía para fechas no definidas
   }
 
   String get horaIniDisplay {
-    return horaIni.isNotEmpty ? horaIni : 'N/A';
+    return horaIni.isNotEmpty ? horaIni : 'N/A';//es una cadena vacía para horas no definidas
   }
 
   String get horaFinDisplay {
-    return horaFin.isNotEmpty ? horaFin : 'N/A';
+    return horaFin.isNotEmpty ? horaFin : 'N/A';//es una cadena vacía para horas no definidas
   }
 
   String get rangoHorario {
-    return '$horaIniDisplay - $horaFinDisplay';
+    return '$horaIniDisplay - $horaFinDisplay';// es el rango horario completo de la reserva para mostrar
   }
 }
 

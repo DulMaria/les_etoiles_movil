@@ -12,8 +12,8 @@ class ReservaHotel {
   // Relaciones y campos adicionales del API
   final int? reservasGen;
   final int? datosCliente;
-  final int? habitacion; // ID de habitación
-  final String? habitacionNumero; // Número de habitación (del endpoint)
+  final int? habitacion;
+  final String? habitacionNumero;
   
   final String? cliente;
   final String? clienteTelefono;
@@ -52,7 +52,6 @@ class ReservaHotel {
   });
 
   factory ReservaHotel.fromJson(Map<String, dynamic> json) {
-    // 🔹 NORMALIZAR EL ESTADO (eliminar espacios y convertir a mayúscula)
     String estadoNormalizado = (json['estado']?.toString() ?? 'A').trim().toUpperCase();
     
     return ReservaHotel(
@@ -61,16 +60,14 @@ class ReservaHotel {
       amoblado: json['amoblado']?.toString() ?? '',
       fechaIni: json['fecha_ini']?.toString() ?? '',
       fechaFin: json['fecha_fin']?.toString() ?? '',
-      estado: estadoNormalizado, // ✅ Ahora usa el estado normalizado
+      estado: estadoNormalizado,
       banioPriv: json['baño_priv']?.toString() ?? json['banio_priv']?.toString() ?? '',
       
-      // IDs de relaciones
       reservasGen: _parseToIntNullable(json['reservas_gen']),
       datosCliente: _parseToIntNullable(json['datos_cliente']),
       habitacion: _parseToIntNullable(json['habitacion']),
       habitacionNumero: json['habitacion']?.toString(),
       
-      // Campos adicionales
       cliente: json['cliente']?.toString(),
       clienteTelefono: json['cliente_telefono']?.toString(),
       
@@ -91,7 +88,6 @@ class ReservaHotel {
     );
   }
 
-  // Helper para convertir int de forma segura
   static int _parseToInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -99,7 +95,6 @@ class ReservaHotel {
     return 0;
   }
 
-  // Helper para convertir int nullable
   static int? _parseToIntNullable(dynamic value) {
     if (value == null) return null;
     if (value is int) return value;
@@ -125,12 +120,10 @@ class ReservaHotel {
   }
 
   String get estadoTexto {
-    // 🔹 MEJORADO: Normaliza el estado antes de comparar
     final estadoNormalizado = estado.trim().toUpperCase();
     
     switch (estadoNormalizado) {
       case 'A':
-        // 🏨 Si tiene check-in pero NO check-out = En Curso
         if (checkIn != null && checkIn!.isNotEmpty && 
             (checkOut == null || checkOut!.isEmpty)) {
           return 'En Curso';
@@ -141,23 +134,20 @@ class ReservaHotel {
       case 'F':
         return 'Finalizada';
       default:
-        // 🔹 DEBUG: Muestra el estado real si no coincide
         return 'Desconocido ($estadoNormalizado)';
     }
   }
 
-  // 🔹 NUEVO: Getter para color según estado
   Color get estadoColor {
     final estadoNormalizado = estado.trim().toUpperCase();
     
     switch (estadoNormalizado) {
       case 'A':
-        // 🏨 Si tiene check-in = En Curso (azul)
         if (checkIn != null && checkIn!.isNotEmpty && 
             (checkOut == null || checkOut!.isEmpty)) {
           return Colors.blue;
         }
-        return Colors.green; // Activa (pendiente)
+        return Colors.green;
       case 'C':
         return Colors.red;
       case 'F':
@@ -167,18 +157,16 @@ class ReservaHotel {
     }
   }
 
-  // 🔹 NUEVO: Getter para icono según estado
   IconData get estadoIcono {
     final estadoNormalizado = estado.trim().toUpperCase();
     
     switch (estadoNormalizado) {
       case 'A':
-        // 🏨 Si tiene check-in = En Curso
         if (checkIn != null && checkIn!.isNotEmpty && 
             (checkOut == null || checkOut!.isEmpty)) {
-          return Icons.hotel; // En curso
+          return Icons.hotel;
         }
-        return Icons.pending; // Pendiente
+        return Icons.pending;
       case 'C':
         return Icons.cancel;
       case 'F':
@@ -198,16 +186,77 @@ class ReservaHotel {
     return 'N/A';
   }
 
+  // 📅 FECHA DE INICIO DE RESERVA (SIEMPRE LA ORIGINAL)
   String get fechaDisplay {
-    return fechaIni.isNotEmpty ? fechaIni : 'N/A';
+    if (fechaIni.isNotEmpty) return _formatearFecha(fechaIni);
+    
+    // 🔧 FALLBACK: Si no hay fecha_ini pero sí hay check-in, extraer la fecha
+    if (checkIn != null && checkIn!.isNotEmpty) {
+      return _formatearFecha(checkIn!);
+    }
+    
+    return 'N/A';
   }
 
+  // 📅 FECHA DE FIN DE RESERVA (SIEMPRE LA ORIGINAL)
   String get fechaFinDisplay {
-    if (fechaFin.isNotEmpty) return fechaFin;
+    if (fechaFin.isNotEmpty) return _formatearFecha(fechaFin);
+    
+    // Fallback a fecha esperada si no hay fecha_fin
     if (fechaCheckOutEsperado != null && fechaCheckOutEsperado!.isNotEmpty) {
-      return fechaCheckOutEsperado!;
+      return _formatearFecha(fechaCheckOutEsperado!);
+    }
+    
+    return 'N/A';
+  }
+  
+  // 📅 FECHA REAL DE CHECK-IN (cuando se realizó el ingreso)
+  String get fechaCheckInRealizado {
+    if (checkIn != null && checkIn!.isNotEmpty) {
+      return _formatearFecha(checkIn!);
     }
     return 'N/A';
+  }
+  
+  // 📅 FECHA REAL DE CHECK-OUT (cuando se realizó la salida)
+  String get fechaCheckOutRealizado {
+    if (checkOut != null && checkOut!.isNotEmpty) {
+      return _formatearFecha(checkOut!);
+    }
+    return 'N/A';
+  }
+
+  // 📅 NUEVO: Método auxiliar para formatear fechas
+  String _formatearFecha(String fecha) {
+    if (fecha.isEmpty) return 'N/A';
+    
+    try {
+      // Si la fecha incluye hora (formato: "2024-01-15T10:30:00")
+      if (fecha.contains('T')) {
+        return fecha.split('T')[0]; // Retorna solo "2024-01-15"
+      }
+      
+      // Si ya está en formato simple, retornarla tal cual
+      return fecha;
+    } catch (e) {
+      return fecha; // En caso de error, retornar la fecha original
+    }
+  }
+
+  // 📅 NUEVO: Rango de fechas completo para mostrar
+  String get rangoFechas {
+    final inicio = fechaDisplay;
+    final fin = fechaFinDisplay;
+    
+    if (inicio == 'N/A' && fin == 'N/A') {
+      return 'Fechas no disponibles';
+    }
+    
+    if (inicio == fin) {
+      return inicio; // Si son iguales, mostrar solo una vez
+    }
+    
+    return '$inicio - $fin';
   }
 
   bool get esAmoblado {

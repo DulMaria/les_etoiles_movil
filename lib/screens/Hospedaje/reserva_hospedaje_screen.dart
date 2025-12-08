@@ -229,84 +229,903 @@ class _ReservaHospedajeScreenState extends State<ReservaHospedajeScreen>
     }
   }
 
-  void _verDetalles(ReservaHotel reserva) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.hotel, color: primaryBlue),
-            const SizedBox(width: 8),
-            const Text('Detalles de Reserva'),
-          ],
+void _verDetalles(ReservaHotel reserva) {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  
+  showDialog(
+    context: context,
+    barrierColor: Colors.black.withOpacity(0.5),
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFFFBF5),
+                  Color(0xFFF5F9FF),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromARGB(246, 48, 155, 255).withOpacity(0.4),
+                  blurRadius: 30,
+                  spreadRadius: -5,
+                  offset: const Offset(0, 15),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 🔷 ENCABEZADO CON COLORES VIVOS
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF4A6FFF), // Azul vivo
+                        Color(0xFF6B8CFF),
+                        Color(0xFF8DA9FF),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF4A6FFF).withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.white.withOpacity(0.95),
+                                  Colors.white.withOpacity(0.85),
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0xFF4A6FFF).withOpacity(0.3),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.hotel_outlined,
+                              color: Color(0xFF4A6FFF),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Detalles de Reserva',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.tag,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'ID: ${reserva.idReservaHotel}',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // BADGE DE ESTADO VIVO
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                              border: Border.all(color: Colors.white.withOpacity(0.8)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: _getEstadoColorVivo(reserva),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: _getEstadoColorVivo(reserva).withOpacity(0.6),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  reserva.estadoTexto,
+                                  style: TextStyle(
+                                    color: _getEstadoColorVivo(reserva),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // INDICADORES CON COLORES VIVOS
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildPageIndicatorVivo(0, _currentPage, 'Cliente', Icons.person, Color(0xFFFF6B9D)),
+                          const SizedBox(width: 8),
+                          _buildPageIndicatorVivo(1, _currentPage, 'Hospedaje', Icons.hotel, Color(0xFF4A6FFF)),
+                          const SizedBox(width: 8),
+                          _buildPageIndicatorVivo(2, _currentPage, 'Fechas', Icons.calendar_today, Color(0xFFFFA726)),
+                          const SizedBox(width: 8),
+                          _buildPageIndicatorVivo(3, _currentPage, 'Resumen', Icons.summarize, Color(0xFF00BCD4)), // Celeste
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 📋 CONTENIDO
+                Flexible(
+                  child: SizedBox(
+                    height: 400,
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      children: [
+                        // PÁGINA 1: CLIENTE - ROSA VIVO
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              _buildSeccionViva(
+                                icon: Icons.person_outline_rounded,
+                                titulo: 'Información del Cliente',
+                                gradientColors: [Color(0xFFFF6B9D), Color(0xFFFF8EBC)],
+                                borderColor: Color(0xFFFF6B9D),
+                                children: [
+                                  _buildItemVivo(
+                                    icon: Icons.account_circle,
+                                    label: 'Nombre Completo',
+                                    valor: reserva.cliente ?? 'No especificado',
+                                    color: Color(0xFFFF6B9D),
+                                    isPrimary: true,
+                                  ),
+                                  if (reserva.clienteTelefono != null)
+                                    _buildItemVivo(
+                                      icon: Icons.phone_in_talk,
+                                      label: 'Teléfono',
+                                      valor: reserva.clienteTelefono!,
+                                      color: Color(0xFF4A6FFF),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // PÁGINA 2: HOSPEDAJE - AZUL VIVO
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              _buildSeccionViva(
+                                icon: Icons.hotel_rounded,
+                                titulo: 'Detalles del Hospedaje',
+                                gradientColors: [Color(0xFF4A6FFF), Color(0xFF6B8CFF)],
+                                borderColor: Color(0xFF4A6FFF),
+                                children: [
+                                  _buildItemVivo(
+                                    icon: Icons.meeting_room,
+                                    label: 'Habitación',
+                                    valor: reserva.habitacionTexto,
+                                    color: Color(0xFF4A6FFF),
+                                    isPrimary: true,
+                                  ),
+                                  _buildItemVivo(
+                                    icon: Icons.groups,
+                                    label: 'Cantidad de Personas',
+                                    valor: '${reserva.cantPersonas} personas',
+                                    color: Color(0xFF6B8CFF),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // PÁGINA 3: FECHAS - NARANJA VIVO para fechas programadas
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              _buildSeccionViva(
+                                icon: Icons.calendar_month_rounded,
+                                titulo: 'Fechas Programadas',
+                                gradientColors: [Color(0xFFFFA726), Color(0xFFFFB74D)],
+                                borderColor: Color(0xFFFFA726),
+                                children: [
+                                  _buildItemVivo(
+                                    icon: Icons.event_available,
+                                    label: 'Fecha de Inicio',
+                                    valor: reserva.fechaDisplay,
+                                    color: Color(0xFFFFA726),
+                                    isPrimary: true,
+                                  ),
+                                  _buildItemVivo(
+                                    icon: Icons.event_busy,
+                                    label: 'Fecha de Fin',
+                                    valor: reserva.fechaFinDisplay,
+                                    color: Color(0xFFFFA726),
+                                    isPrimary: true,
+                                  ),
+                                ],
+                              ),
+                              if (reserva.checkIn != null || reserva.checkOut != null) ...[
+                                const SizedBox(height: 16),
+                                _buildSeccionViva(
+                                  icon: Icons.check_circle,
+                                  titulo: 'Fechas Reales',
+                                  gradientColors: [Color(0xFFCDDC39), Color(0xFFD4E157)], // Verde limón claro
+                                  borderColor: Color(0xFFCDDC39), // Verde limón
+                                  children: [
+                                    if (reserva.checkIn != null)
+                                      _buildItemVivo(
+                                        icon: Icons.login,
+                                        label: 'Ingreso Realizado',
+                                        valor: reserva.fechaCheckInRealizado,
+                                        color: Color(0xFFCDDC39), // Verde limón
+                                        isPrimary: true,
+                                      ),
+                                    if (reserva.checkOut != null)
+                                      _buildItemVivo(
+                                        icon: Icons.logout,
+                                        label: 'Salida Realizada',
+                                        valor: reserva.fechaCheckOutRealizado,
+                                        color: Color(0xFFCDDC39), // Verde limón
+                                        isPrimary: true,
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+
+                        // PÁGINA 4: RESUMEN - CELESTE VIVO
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              if (reserva.tiempoHospedado != null || reserva.duracionEstadia != null)
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFF00BCD4), // Celeste
+                                        Color(0xFF26C6DA),
+                                        Color(0xFFE0F7FA),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Color(0xFF00BCD4),
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color(0xFF00BCD4).withOpacity(0.4),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [Color(0xFF00BCD4), Color(0xFF26C6DA)],
+                                          ),
+                                          borderRadius: BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Color(0xFF00BCD4).withOpacity(0.5),
+                                              blurRadius: 15,
+                                              offset: const Offset(0, 6),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(
+                                          Icons.schedule,
+                                          color: Colors.white,
+                                          size: 48,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Text(
+                                        'TIEMPO DE ESTADÍA',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        reserva.tiempoHospedado?.texto ?? 
+                                        reserva.duracionEstadia?.texto ?? 
+                                        'No disponible',
+                                        style: TextStyle(
+                                          fontSize: 28,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0.5,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withOpacity(0.2),
+                                              blurRadius: 4,
+                                              offset: Offset(1, 1),
+                                            ),
+                                          ],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Período completo de hospedaje',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 20),
+                              _buildResumenVivo(reserva: reserva),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // 🎬 CONTROLES CON COLORES VIVOS
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF4A6FFF),
+                        Color(0xFF6B8CFF),
+                      ],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(28),
+                      bottomRight: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF4A6FFF).withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      if (_currentPage > 0)
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              _pageController.previousPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+                            label: const Text('ANTERIOR'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Color(0xFF4A6FFF),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                side: BorderSide(color: Colors.white, width: 2),
+                              ),
+                              elevation: 4,
+                              shadowColor: Colors.white.withOpacity(0.3),
+                            ),
+                          ),
+                        ),
+                      if (_currentPage > 0) const SizedBox(width: 12),
+                      Expanded(
+                        flex: _currentPage == 0 ? 2 : 1,
+                        child: ElevatedButton.icon(
+                          onPressed: _currentPage < 3
+                              ? () {
+                                  _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                }
+                              : () => Navigator.pop(context),
+                          icon: Icon(
+                            _currentPage < 3 ? Icons.arrow_forward_ios_rounded : Icons.check_circle,
+                            size: 18,
+                          ),
+                          label: Text(
+                            _currentPage < 3 ? 'SIGUIENTE' : 'CERRAR',
+                            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Color(0xFF4A6FFF),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 8,
+                            shadowColor: Colors.black.withOpacity(0.2),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+Color _getEstadoColorVivo(ReservaHotel reserva) {
+  if (reserva.checkOut != null) return Color(0xFF4CAF50); // Verde vivo
+  if (reserva.checkIn != null) return Color(0xFF2196F3); // Azul vivo
+  if (reserva.estado == 'C') return Color(0xFFF44336); // Rojo vivo
+  return Color(0xFFFF9800); // Naranja vivo
+}
+
+Widget _buildPageIndicatorVivo(int index, int currentPage, String label, IconData icon, Color color) {
+  final isActive = index == currentPage;
+  
+  return AnimatedContainer(
+    duration: const Duration(milliseconds: 300),
+    padding: EdgeInsets.symmetric(horizontal: isActive ? 14 : 10, vertical: 10),
+    decoration: BoxDecoration(
+      color: isActive ? Colors.white : Colors.white.withOpacity(0.2),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(
+        color: isActive ? color : Colors.white.withOpacity(0.4),
+        width: isActive ? 2 : 1,
+      ),
+      boxShadow: isActive
+          ? [
+              BoxShadow(
+                color: color.withOpacity(0.4),
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.3),
+                blurRadius: 5,
+                spreadRadius: 1,
+              ),
+            ]
+          : null,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: isActive ? 20 : 16,
+          color: isActive ? color : Colors.white,
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+        if (isActive) ...[
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+Widget _buildSeccionViva({
+  required IconData icon,
+  required String titulo,
+  required List<Color> gradientColors,
+  required Color borderColor,
+  required List<Widget> children,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Colors.white, gradientColors[1].withOpacity(0.1)],
+      ),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(width: 3, color: borderColor.withOpacity(0.3)),
+      boxShadow: [
+        BoxShadow(
+          color: borderColor.withOpacity(0.3),
+          blurRadius: 15,
+          offset: const Offset(0, 6),
+        ),
+        BoxShadow(
+          color: Colors.white.withOpacity(0.8),
+          blurRadius: 10,
+          offset: const Offset(0, -4),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: gradientColors),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(18),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: borderColor.withOpacity(0.4),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
             children: [
-              _buildDetalleItem('ID Reserva', reserva.idReservaHotel.toString()),
-              const Divider(),
-              _buildDetalleItem('Cliente', reserva.cliente ?? 'N/A'),
-              if (reserva.clienteTelefono != null)
-                _buildDetalleItem('Teléfono', reserva.clienteTelefono!),
-              const Divider(),
-              _buildDetalleItem('Habitación', reserva.habitacionTexto),
-              _buildDetalleItem('Personas', reserva.cantPersonas.toString()),
-              _buildDetalleItem('Check-in', reserva.fechaDisplay),
-              _buildDetalleItem('Check-out', reserva.fechaFinDisplay),
-              const Divider(),
-              if (reserva.checkIn != null)
-                _buildDetalleItem('Check-in Realizado', reserva.checkIn!),
-              if (reserva.checkOut != null)
-                _buildDetalleItem('Check-out Realizado', reserva.checkOut!),
-              if (reserva.tiempoHospedado != null)
-                _buildDetalleItem('Tiempo Hospedado', reserva.tiempoHospedado!.texto),
-              if (reserva.duracionEstadia != null)
-                _buildDetalleItem('Duración Estadía', reserva.duracionEstadia!.texto),
-              const Divider(),
-              _buildDetalleItem('Estado', reserva.estadoTexto),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: borderColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, color: borderColor, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  titulo,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 2,
+                        offset: Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(foregroundColor: primaryBlue),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
-  }
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(children: children),
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget _buildDetalleItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
+Widget _buildItemVivo({
+  required IconData icon,
+  required String label,
+  required String valor,
+  required Color color,
+  bool isPrimary = false,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: color.withOpacity(0.2), width: 2),
+      boxShadow: [
+        BoxShadow(
+          color: color.withOpacity(0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                color,
+                color.withOpacity(0.8),
+              ],
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.4),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 22, color: Colors.white),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF666666),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                valor,
+                style: TextStyle(
+                  fontSize: isPrimary ? 18 : 16,
+                  color: Color(0xFF333333),
+                  fontWeight: isPrimary ? FontWeight.bold : FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildResumenVivo({required ReservaHotel reserva}) {
+  return Container(
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+         Color(0xFF00BCD4), // Celeste
+          Color(0xFF26C6DA),
+          Colors.white,
+        ],
+        stops: [0.1, 0.4, 1],
+      ),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: Color.fromARGB(255, 149, 229, 240), width: 3),
+      boxShadow: [
+        BoxShadow(
+          color: Color.fromARGB(255, 255, 255, 255).withOpacity(0.3),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color.fromARGB(255, 63, 232, 255), Color.fromARGB(255, 0, 201, 227)], // Celeste
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromARGB(255, 85, 232, 252).withOpacity(0.5),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.summarize, color: Colors.white, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Resumen Completo',
+              style: TextStyle(
+                fontSize: 18,
+                color: Color.fromARGB(255, 255, 255, 255), // Celeste
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                letterSpacing: 0.5,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _buildResumenItemVivo(Icons.tag, 'ID', '${reserva.idReservaHotel}', Color(0xFF4A6FFF)),
+        _buildResumenItemVivo(Icons.person, 'Cliente', reserva.cliente ?? 'N/A', Color(0xFFFF6B9D)),
+        _buildResumenItemVivo(Icons.meeting_room, 'Habitación', reserva.habitacionTexto, Color(0xFFFFA726)),
+        _buildResumenItemVivo(Icons.info, 'Estado', reserva.estadoTexto, _getEstadoColorVivo(reserva)),
+      ],
+    ),
+  );
+}
+
+Widget _buildResumenItemVivo(IconData icon, String label, String value, Color color) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.2), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color, color.withOpacity(0.8)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 20, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: color.withOpacity(0.8),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF333333),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
-    );
-  }
-
+    ),
+  );
+}
   void _mostrarLoading() {
     showDialog(
       context: context,
